@@ -130,10 +130,17 @@ void test4()
 {
 	printf("\nstart test4\n");
 	JsonNode* root = new JsonNode();
-	const char* src_file = "E:\\git\\superjson\\TestCtrl.json";
+	const char* src_file = "./TestCtrl.json";
 	root->readFile(src_file);
-	const char* dst_file = "E:\\git\\superjson\\TestCtrl123.json";
-	root->writeFile(dst_file);
+	const char* dst_file = "./TestCtrl123.json";
+    if(root->count() == 1)
+    {
+        root->writeFile(dst_file);
+    }
+    else
+    {
+        printf("parse failed \n");
+    }
 	printf("end test4\n");
 }
 

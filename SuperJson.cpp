@@ -72,9 +72,9 @@ static inline void ToString(int v, char* buffer, int size)
     SNPRINTF(buffer, size, "%d", v);
 }
 
-static inline void ToString(unsigned v, char* buffer, int size)
+static inline void ToString(long v, char* buffer, int size)
 {
-    SNPRINTF(buffer, size, "%u", v);
+    SNPRINTF(buffer, size, "%ld", v);
 }
 
 static inline void ToString(bool v, char* buffer, int size)
@@ -82,10 +82,10 @@ static inline void ToString(bool v, char* buffer, int size)
     SNPRINTF(buffer, size, "%d", v?1:0);
 }
 
-static inline void ToString(float v, char* buffer, int size)
-{
-    SNPRINTF(buffer, size, "%g", v);
-}
+//static inline void ToString(float v, char* buffer, int size)
+//{
+//    SNPRINTF(buffer, size, "%g", v);
+//}
 
 static inline void ToString(double v, char* buffer, int size)
 {
@@ -97,53 +97,53 @@ static inline bool StringEqual(const char* s1, const char* s2)
     return strcmp(s1, s2) == 0;
 }
 
-static inline bool ToInt(const char* str, int* value)
-{
-    if (SSCANF(str, "%d", value) == 1)
-    {
-        return true;
-    }
-    return false;
-}
+//static inline bool ToInt(const char* str, int* value)
+//{
+//    if (SSCANF(str, "%d", value) == 1)
+//    {
+//        return true;
+//    }
+//    return false;
+//}
 
-static inline bool ToUnsigned(const char* str, unsigned *value)
-{
-    if (SSCANF(str, "%u", value) == 1)
-    {
-        return true;
-    }
-    return false;
-}
+//static inline bool ToUnsigned(const char* str, unsigned *value)
+//{
+//    if (SSCANF(str, "%u", value) == 1)
+//    {
+//        return true;
+//    }
+//    return false;
+//}
 
-static inline bool ToBool(const char* str, bool* value)
-{
-    int ival = 0;
-    if (ToInt(str, &ival))
-    {
-        *value = (ival==0) ? false : true;
-        return true;
-    }
-    if (StringEqual(str, "true"))
-    {
-        *value = true;
-        return true;
-    }
-    else if (StringEqual(str, "false"))
-    {
-        *value = false;
-        return true;
-    }
-    return false;
-}
+//static inline bool ToBool(const char* str, bool* value)
+//{
+//    int ival = 0;
+//    if (ToInt(str, &ival))
+//    {
+//        *value = (ival==0) ? false : true;
+//        return true;
+//    }
+//    if (StringEqual(str, "true"))
+//    {
+//        *value = true;
+//        return true;
+//    }
+//    else if (StringEqual(str, "false"))
+//    {
+//        *value = false;
+//        return true;
+//    }
+//    return false;
+//}
 
-static inline bool ToFloat(const char* str, float* value)
-{
-    if (SSCANF(str, "%f", value) == 1)
-    {
-        return true;
-    }
-    return false;
-}
+//static inline bool ToFloat(const char* str, float* value)
+//{
+//    if (SSCANF(str, "%f", value) == 1)
+//    {
+//        return true;
+//    }
+//    return false;
+//}
 
 static inline bool ToDouble(const char* str, double* value)
 {
@@ -391,7 +391,6 @@ void JsonNode::JsonContext::writeBuffer(char* data, size_t len)
         _bufferTail = buffer;
     }
     size_t leftCap;
-	size_t idx = 0;
     while (len > 0)
     {
         leftCap = buffer->_capacity - buffer->_len;
@@ -465,12 +464,12 @@ const char* JsonNode::none = 0;
 
 JsonNode::JsonNode()
 :_type(JsonNode::ROOT),
+_context(0),
+_wcontext(0),
 _key(0),
 _box(0),
 _index(-1),
-_segment(0),
-_wcontext(0),
-_context(0)
+_segment(0)
 {
 }
 
@@ -1103,7 +1102,7 @@ void JsonNode::readFile(const char* filePath)
     FILE * fp = fopen(filePath, "r");
     if (fp == 0)
     {
-        PRINTF("SuperJson read file error:%s",strerror(errno));
+        PRINTF("SuperJson read file error:%s\n",strerror(errno));
         return;
     }
     fseek(fp, 0, SEEK_END);
@@ -1125,7 +1124,7 @@ void JsonNode::readFile(const char* filePath)
 		{
 			fclose(fp);
 			FREE(data);
-			PRINTF("SuperJson read file error:%s", strerror(errno));
+			PRINTF("SuperJson read file error:%s\n", strerror(errno));
 			return;
 		}
 		else if(ret == 0)
@@ -1146,7 +1145,7 @@ void JsonNode::writeFile(const char* filePath)
     FILE * fp = fopen(filePath, "w");
     if (fp == 0)
     {
-        PRINTF("SuperJson write file error:%s",strerror(errno));
+        PRINTF("SuperJson write file error:%s\n",strerror(errno));
         return;
     }
     fseek(fp, 0, SEEK_SET);
@@ -1380,13 +1379,14 @@ void JsonObject::__read(JsonContext* context)
 
 void JsonObject::__write(JsonContext* context)
 {
-	char* tmp;
+	const char* tmp;
 	if (_key)
 	{
-		tmp = (char*)MALLOC(_key->getStringLen()+ 8);
-		int ret = sprintf(tmp, "\"%s\":{", getKey());
-		context->writeBuffer(tmp, ret);
-		FREE(tmp);
+        char* tmp1;
+		tmp1 = (char*)MALLOC(_key->getStringLen()+ 8);
+		int ret = sprintf(tmp1, "\"%s\":{", getKey());
+		context->writeBuffer(tmp1, ret);
+		FREE(tmp1);
 	}
 	else
 	{
@@ -1485,13 +1485,14 @@ void JsonArray::__read(JsonContext* context)
 
 void JsonArray::__write(JsonContext* context)
 {
-	char* tmp;
+	const char* tmp;
 	if (_key)
 	{
-		tmp = (char*)MALLOC(_key->getStringLen() + 8);
-		int ret = sprintf(tmp, "\"%s\":[", getKey());
-		context->writeBuffer(tmp, ret);
-		FREE(tmp);
+        char* tmp1;
+		tmp1 = (char*)MALLOC(_key->getStringLen() + 8);
+		int ret = sprintf(tmp1, "\"%s\":[", getKey());
+		context->writeBuffer(tmp1, ret);
+		FREE(tmp1);
 	}
 	else
 	{
