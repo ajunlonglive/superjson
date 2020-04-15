@@ -7,9 +7,11 @@
 ## 介绍
 SuperJson是一个Json解析器和生成器，它的设计遵循着无语言特性，可以用任何编程语言实现，目前暂时实现C++版本。
 + SuperJson很迷你，代码行数不超过2000，但功能相对完善。
-+ SuperJson解析是非常快速，直接复制一份json数据，在此基础上标记每个值的位置，并无切割字符串，用node-tree的方式管理这些node。因此，它解析大json文件非常快速。只有取值的时候，才根据标记去获得相应的值。
++ SuperJson解析是非常快速，直接复制一份json数据，在此基础上，不会进行任何字符串切割，只是标记每个值的位置pos和len, 用node-tree的方式管理这些节点node。因此，它解析大json文件非常快速。只有取值的时候，才根据标记去获得相应的值。
 如果是字符串，直接返回json数据的内存所在地址，该内存片段末尾被置为0，确保是c语言字符串，当然也有字段记录数据片段的大小，以防数据缺失。如果获取的值是数值，会生成segment片段，记录此数值。
-+ SuperJson使用node-tree管理，节点管理通过c语言数组。保证迭代json节点的高效。有四种jsonnode。父类jsonnode是root节点，否则其子类就是子节点。子节点有NumberNode,StringNode,ObjectNode,ArrayNode四个，对应记录的json类型。root节点不记录任何值，只保存了树根节点。
++ SuperJson使用节点node管理的，节点管理通过c语言数组实现，保证迭代json节点的高效。有四种节点node，这四种节点继承jsonnode。父类jsonnode是root节点，否则其子类就是子节点。子节点有NumberNode,StringNode,ObjectNode,ArrayNode四个，对应记录的json类型。root节点不记录任何值，只保存了树根节点。
++ SuperJson的内存管理很高效，当然还有进一步优化的空间。
+注意：不能释放SuperJson返回都内存，即使是write操作返回json字符串，也不能进行释放。因为它已经绑定到root节上。root节点释放，它就会自动被释放。
 
 ## 配置
 只有源文件SuperJson.h和SuperJson.cpp，无其他依赖。跑测试例子，可以使用cmake快速构建编译执行
