@@ -11,7 +11,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <errno.h>
-
+#include <math.h>
 #include <cstring>
 
 namespace SuperJson {
@@ -66,7 +66,6 @@ inline int SNPRINTF( char* buffer, size_t size, const char* format, ... )
 #define FREE free
 
 
-
 static inline void ToString(int v, char* buffer, int size)
 {
     SNPRINTF(buffer, size, "%d", v);
@@ -89,7 +88,12 @@ static inline void ToString(bool v, char* buffer, int size)
 
 static inline void ToString(double v, char* buffer, int size)
 {
-    SNPRINTF(buffer, size, "%g", v);
+    double tmp = floor(v);
+    if (tmp == v) {
+        SNPRINTF(buffer, size, "%ld", (long)v);
+    }else{
+        SNPRINTF(buffer, size, "%g", v);
+    }
 }
 
 static inline bool StringEqual(const char* s1, const char* s2)
@@ -988,6 +992,126 @@ void JsonNode::addNode(const char* key, JsonNode* node)
 	keyNode->setString(key);
 	node->_key = (JsonString*)keyNode;
 	addNode(node);
+}
+
+void JsonNode::addStringNode(const char* key, const char* val)
+{
+    JsonNode* valNode = newStringNode();
+    valNode->setString(val);
+    if (_type == JsonNode::OBJECT) {
+        ASSERT(key != NULL);
+        JsonNode* keyNode = newStringNode();
+        keyNode->setString(key);
+        valNode->_key = (JsonString*)keyNode;
+        addNode(valNode);
+    }else if (_type == JsonNode::ARRAY){
+        ASSERT(key == NULL);
+        valNode->_key = 0;
+        addNode(valNode);
+    }else{
+        delete valNode;
+        throwError("JsonNode must be OBJECT or ARRAY");
+    }
+}
+
+void JsonNode::addNumberNode(const char* key, double val)
+{
+    JsonNode* valNode = newNumberNode();
+    valNode->setNumber(val);
+    if (_type == JsonNode::OBJECT) {
+        ASSERT(key != NULL);
+        JsonNode* keyNode = newStringNode();
+        keyNode->setString(key);
+        valNode->_key = (JsonString*)keyNode;
+        addNode(valNode);
+    }else if (_type == JsonNode::ARRAY){
+        ASSERT(key == NULL);
+        valNode->_key = 0;
+        addNode(valNode);
+    }else{
+        delete valNode;
+        throwError("JsonNode must be OBJECT or ARRAY");
+    }
+}
+
+void JsonNode::addBoolNode(const char* key, bool val)
+{
+    JsonNode* valNode = newNumberNode();
+    valNode->setBool(val);
+    if (_type == JsonNode::OBJECT) {
+        ASSERT(key != NULL);
+        JsonNode* keyNode = newStringNode();
+        keyNode->setString(key);
+        valNode->_key = (JsonString*)keyNode;
+        addNode(valNode);
+    }else if (_type == JsonNode::ARRAY){
+        ASSERT(key == NULL);
+        valNode->_key = 0;
+        addNode(valNode);
+    }else{
+        delete valNode;
+        throwError("JsonNode must be OBJECT or ARRAY");
+    }
+}
+
+void JsonNode::addIntegerNode(const char* key, int val)
+{
+    JsonNode* valNode = newNumberNode();
+    valNode->setInteger(val);
+    if (_type == JsonNode::OBJECT) {
+        ASSERT(key != NULL);
+        JsonNode* keyNode = newStringNode();
+        keyNode->setString(key);
+        valNode->_key = (JsonString*)keyNode;
+        addNode(valNode);
+    }else if (_type == JsonNode::ARRAY){
+        ASSERT(key == NULL);
+        valNode->_key = 0;
+        addNode(valNode);
+    }else{
+        delete valNode;
+        throwError("JsonNode must be OBJECT or ARRAY");
+    }
+}
+
+void JsonNode::addLongNode(const char* key, long val)
+{
+    JsonNode* valNode = newNumberNode();
+    valNode->setLong(val);
+    if (_type == JsonNode::OBJECT) {
+        ASSERT(key != NULL);
+        JsonNode* keyNode = newStringNode();
+        keyNode->setString(key);
+        valNode->_key = (JsonString*)keyNode;
+        addNode(valNode);
+    }else if (_type == JsonNode::ARRAY){
+        ASSERT(key == NULL);
+        valNode->_key = 0;
+        addNode(valNode);
+    }else{
+        delete valNode;
+        throwError("JsonNode must be OBJECT or ARRAY");
+    }
+}
+
+void JsonNode::addDoubleNode(const char* key, double val)
+{
+    JsonNode* valNode = newNumberNode();
+    valNode->setDouble(val);
+    if (_type == JsonNode::OBJECT) {
+        ASSERT(key != NULL);
+        JsonNode* keyNode = newStringNode();
+        keyNode->setString(key);
+        valNode->_key = (JsonString*)keyNode;
+        addNode(valNode);
+    }else if (_type == JsonNode::ARRAY){
+        ASSERT(key == NULL);
+        valNode->_key = 0;
+        addNode(valNode);
+    }else{
+        delete valNode;
+        throwError("JsonNode must be OBJECT or ARRAY");
+    }
 }
 
 bool JsonNode::removeNode(JsonNode* node)

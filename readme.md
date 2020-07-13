@@ -30,6 +30,38 @@ cmake ../
 也可以用cmake可视化工具进行生成工程。非常简单，不在此介绍。
 
 ## demo
+
+记录文件列表demo
+```c++
+	//root 对象
+    JsonNode root;
+    JsonNode* object = root.newObjectNode();
+    root.addNode(object);
+    
+    //创建一个数组对象
+    JsonNode* array = root.newArrayNode();
+    object->addNode("data", array);
+    FileInfo* fileInfo;
+    JsonNode* obj;
+    for (int i=0; i<files.size(); ++i) {
+        fileInfo = &files[i];
+        
+        obj = root.newObjectNode();
+        obj->addStringNode("name", fileInfo->name.c_str());
+        obj->addStringNode("path", fileInfo->path.c_str());
+        obj->addNumberNode("is_dir", fileInfo->is_dir);
+        obj->addNumberNode("mtime", fileInfo->mtime);
+        obj->addNumberNode("size", fileInfo->size);
+
+        array->addNode(obj);
+    }
+    
+    size_t len;
+    const char* buffer = root.write(&len);
+    printf("result:%s\n", buffer);
+```
+
+
 1.解析json字符串
 ```c++
 #include <stdio.h>
@@ -186,7 +218,6 @@ stringd:"string":"test txt"
 object:{"bool":1,"int":323,"double":234.23,"string":"test txt"}
 finish:{"bool":1,"int":323,"double":234.23,"string":"test txt"}
 ```
-
 
 4.迭代整个json结构
 ```c++

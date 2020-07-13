@@ -181,6 +181,14 @@ public:
 	void addNode(const char* key,JsonNode* node);
     bool removeNode(JsonNode* node);
     
+    void addStringNode(const char* key, const char* val);
+    void addNumberNode(const char* key, double val);
+    void addBoolNode(const char* key, bool val);
+    void addIntegerNode(const char* key, int val);
+    void addLongNode(const char* key, long val);
+    void addDoubleNode(const char* key, double val);
+
+    
     void read(const char* data, size_t size);
     const char* write(size_t* size);
     
