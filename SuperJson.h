@@ -134,6 +134,11 @@ private:
     void throwError(const char* errMsg);
 
     double stringToNumber();
+    
+    JsonNode* newNumberNode();
+    JsonNode* newStringNode();
+    JsonNode* newObjectNode();
+    JsonNode* newArrayNode();
 public:
     JsonNode();
     virtual ~JsonNode();
@@ -162,16 +167,27 @@ public:
 	void setLong(long val);
 	void setDouble(double val);
     
+    const char* getString(const char* key);
+    double getNumber(const char* key);
+    bool getBool(const char* key);
+    int getInteger(const char* key);
+    long getLong(const char* key);
+    double getDouble(const char* key);
+    
     inline bool isNumber(){return _type == JsonNode::NUMBER;}
     inline bool isString(){return _type == JsonNode::STRING;}
     inline bool isObject(){return _type == JsonNode::OBJECT;}
     inline bool isArray(){return _type == JsonNode::ARRAY;}
     inline size_t count(){return _box?_box->_count:0;}
 
-	JsonNode* newNumberNode();
-	JsonNode* newStringNode();
-	JsonNode* newObjectNode();
-	JsonNode* newArrayNode();
+    JsonNode* newAddNumberNode();
+    JsonNode* newAddStringNode();
+    JsonNode* newAddObjectNode();
+    JsonNode* newAddArrayNode();
+    JsonNode* newAddNumberNode(const char* key);
+    JsonNode* newAddStringNode(const char* key);
+    JsonNode* newAddObjectNode(const char* key);
+    JsonNode* newAddArrayNode(const char* key);
 
     JsonNode* array(size_t idx);
     JsonNode* object(const char* key);
@@ -181,13 +197,12 @@ public:
 	void addNode(const char* key,JsonNode* node);
     bool removeNode(JsonNode* node);
     
-    void addStringNode(const char* key, const char* val);
-    void addNumberNode(const char* key, double val);
-    void addBoolNode(const char* key, bool val);
-    void addIntegerNode(const char* key, int val);
-    void addLongNode(const char* key, long val);
-    void addDoubleNode(const char* key, double val);
-
+    void addString(const char* key, const char* val);
+    void addNumber(const char* key, double val);
+    void addBool(const char* key, bool val);
+    void addInteger(const char* key, int val);
+    void addLong(const char* key, long val);
+    void addDouble(const char* key, double val);
     
     void read(const char* data, size_t size);
     const char* write(size_t* size);

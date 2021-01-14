@@ -66,20 +66,20 @@ inline int SNPRINTF( char* buffer, size_t size, const char* format, ... )
 #define FREE free
 
 
-static inline void ToString(int v, char* buffer, int size)
-{
-    SNPRINTF(buffer, size, "%d", v);
-}
+//static inline void ToString(int v, char* buffer, int size)
+//{
+//    SNPRINTF(buffer, size, "%d", v);
+//}
 
 static inline void ToString(long v, char* buffer, int size)
 {
     SNPRINTF(buffer, size, "%ld", v);
 }
 
-static inline void ToString(bool v, char* buffer, int size)
-{
-    SNPRINTF(buffer, size, "%d", v?1:0);
-}
+//static inline void ToString(bool v, char* buffer, int size)
+//{
+//    SNPRINTF(buffer, size, "%d", v?1:0);
+//}
 
 //static inline void ToString(float v, char* buffer, int size)
 //{
@@ -100,6 +100,50 @@ static inline bool StringEqual(const char* s1, const char* s2)
 {
     return strcmp(s1, s2) == 0;
 }
+
+static void int2str(int n, char *str)
+{
+    if (str == NULL) return;
+    if (n == 0)
+    {
+        str[0] = '0';
+        str[1] = 0;
+        return;
+    }
+    char buf[256] = {0};
+    int i = 0;
+    int len = 0;
+    int temp = n < 0 ? -n: n;
+    while(temp)
+    {
+        buf[i++] = (temp % 10) + '0';
+        temp = temp / 10;
+    }
+    len = n < 0 ? ++i: i;
+    str[i] = 0;
+    while(1)
+    {
+        i--;
+        if (i < 0 || buf[len-i-1] ==0) break;
+        str[i] = buf[len-i-1];
+    }
+    if (i == 0) str[i] = '-';
+}
+
+//static int str2int(const char *str)
+//{
+//    const char *ptr = str;
+//    if (*str == '-' || *str == '+') str++;
+//    int temp = 0;
+//    while(*str != 0)
+//    {
+//        if ((*str < '0') || (*str > '9')) break;
+//        temp = temp * 10 + (*str - '0');
+//        str++;
+//    }
+//    if (*ptr == '-') temp = -temp;
+//    return temp;
+//}
 
 //static inline bool ToInt(const char* str, int* value)
 //{
@@ -157,6 +201,89 @@ static inline bool ToDouble(const char* str, double* value)
     }
     return false;
 }
+
+
+//static int hex2dec(char c)
+//{
+//    if ('0' <= c && c <= '9')
+//        return c - '0';
+//    else if ('A' <= c && c <= 'F')
+//        return c - 'A' + 10;
+//    else if ('a' <= c && c <= 'f')
+//        return c - 'a' + 10;
+//    else
+//        return -1;
+//}
+//
+//static char dec2hex(short int c)
+//{
+//    if (0 <= c && c <= 9)
+//        return c + '0';
+//    else if (10 <= c && c <= 15)
+//        return c + 'A' - 10;
+//    else
+//        return -1;
+//}
+//
+//static void UrlEncode(const char* src, char* dst, int len)
+//{
+//    size_t length = strlen(src);
+//    ASSERT(length*3 < len);
+//    unsigned char c;
+//    int j;
+//    int i1, i0;
+//    for (size_t i = 0; i < length; i++)
+//    {
+//        c = (unsigned char)src[i];
+//        if (('0' <= c && c <= '9') ||
+//            ('a' <= c && c <= 'z') ||
+//            ('A' <= c && c <= 'Z') ||
+//            c == '/' || c == '.')
+//        {
+//            *dst = c;
+//        }
+//        else
+//        {
+//            j = (short int)c;
+//            if (j < 0) j += 256;
+//
+//            i1 = j / 16;
+//            i0 = j - i1 * 16;
+//
+//            *dst = '%';
+//            dst += 1;
+//            *dst = dec2hex(i1);
+//            dst += 1;
+//            *dst = dec2hex(i0);
+//        }
+//        dst += 1;
+//    }
+//}
+//
+//static void UrlDecode(const char* src, unsigned char* dst, int len)
+//{
+//    size_t length = strlen(src);
+//    ASSERT(length < len);
+//    unsigned char c;
+//    unsigned char high;
+//    unsigned char low;
+//    for (size_t i = 0; i < length; i++)
+//    {
+//        c = (unsigned char)src[i];
+//        if (c != '%')
+//        {
+//            *dst = c;
+//        }
+//        else
+//        {
+//            high = hex2dec((unsigned char)src[++i]);
+//            low = hex2dec((unsigned char)src[++i]);
+//            *dst = (unsigned char)(high*16 + low);
+//        }
+//        dst += 1;
+//    }
+//}
+
 
 
 //JsonBox
@@ -241,7 +368,6 @@ _bufferTail(0)
     memcpy(_data, data, size);
     _offset = 0;
     memset(_boxs, 0, sizeof(_boxs));
-	//PRINTF("create JsonContext\n");
 }
 
 JsonNode::JsonContext::JsonContext()
@@ -252,12 +378,10 @@ _bufferTail(0)
     _size = 0;
     _offset = 0;
     memset(_boxs, 0, sizeof(_boxs));
-	//PRINTF("create JsonContext\n");
 }
 
 JsonNode::JsonContext::~JsonContext()
 {
-	//PRINTF("destroy ~JsonContext\n");
     if(_data)
     {
         FREE(_data);
@@ -464,7 +588,7 @@ void JsonNode::JsonSegment::clear()
 
 //JsonNode
 JsonNode* JsonNode::null = 0;
-const char* JsonNode::none = 0;
+const char* JsonNode::none = "";
 
 JsonNode::JsonNode()
 :_type(JsonNode::ROOT),
@@ -490,7 +614,7 @@ JsonNode::~JsonNode()
         delete _box;
         _box = 0;
     }
-    if (_context->root == this)
+    if (_context != 0 && _context->root == this)
     {
         _context->root = 0;
         delete _context;
@@ -623,7 +747,7 @@ double JsonNode::stringToNumber()
         return 0.0;
     }
 	char tmp[1024] = {0};
-	sprintf(tmp, "%s is no NUMBER", str);
+	sprintf(tmp, "%s is no NUMBER\n", str);
 	throwError(tmp);
 	return 0.0;
 }
@@ -700,6 +824,60 @@ double JsonNode::getDouble()
 		return 0;
 	}
     return getNumber();
+}
+
+const char* JsonNode::getString(const char* key)
+{
+    JsonNode* node = this->object(key);
+    if (!node) {
+        return JsonNode::none;
+    }
+    return node->getString();
+}
+
+double JsonNode::getNumber(const char* key)
+{
+    JsonNode* node = this->object(key);
+    if (!node) {
+        return 0;
+    }
+    return node->getNumber();
+}
+
+bool JsonNode::getBool(const char* key)
+{
+    JsonNode* node = this->object(key);
+    if (!node) {
+        return 0;
+    }
+    return node->getBool();
+}
+                       
+int JsonNode::getInteger(const char* key)
+{
+    JsonNode* node = this->object(key);
+    if (!node) {
+        return 0;
+    }
+    return node->getInteger();
+}
+
+long JsonNode::getLong(const char* key)
+{
+    JsonNode* node = this->object(key);
+    if (!node) {
+        return 0;
+    }
+    return node->getLong();
+}
+
+double JsonNode::getDouble(const char* key)
+{
+    JsonNode* node = this->object(key);
+    if (!node) {
+        return 0;
+    }
+    return node->getDouble();
 }
 
 void JsonNode::setNumber(double val)
@@ -842,6 +1020,62 @@ JsonNode* JsonNode::newArrayNode()
 	return node;
 }
 
+JsonNode* JsonNode::newAddNumberNode()
+{
+    JsonNode* node = newNumberNode();
+    this->addNode(node);
+    return node;
+}
+
+JsonNode* JsonNode::newAddStringNode()
+{
+    JsonNode* node = newStringNode();
+    this->addNode(node);
+    return node;
+}
+
+JsonNode* JsonNode::newAddObjectNode()
+{
+    JsonNode* node = newObjectNode();
+    this->addNode(node);
+    return node;
+}
+
+JsonNode* JsonNode::newAddArrayNode()
+{
+    JsonNode* node = newArrayNode();
+    this->addNode(node);
+    return node;
+}
+
+JsonNode* JsonNode::newAddNumberNode(const char* key)
+{
+    JsonNode* node = newNumberNode();
+    this->addNode(key, node);
+    return node;
+}
+
+JsonNode* JsonNode::newAddStringNode(const char* key)
+{
+    JsonNode* node = newStringNode();
+    this->addNode(key, node);
+    return node;
+}
+
+JsonNode* JsonNode::newAddObjectNode(const char* key)
+{
+    JsonNode* node = newObjectNode();
+    this->addNode(key, node);
+    return node;
+}
+
+JsonNode* JsonNode::newAddArrayNode(const char* key)
+{
+    JsonNode* node = newArrayNode();
+    this->addNode(key, node);
+    return node;
+}
+
 JsonNode* JsonNode::array(size_t idx)
 {
     if (_box->_count == 0 || idx >= _box->_count)
@@ -853,6 +1087,10 @@ JsonNode* JsonNode::array(size_t idx)
 
 JsonNode* JsonNode::object(const char* key)
 {
+    if (_box == 0)
+    {
+        return JsonNode::null;
+    }
     if (_box->_count > 0)
     {
         if(_type != JsonNode::OBJECT)
@@ -891,7 +1129,8 @@ unsigned char JsonNode::getCharCode()
 {
     if (_idx < _context->_size)
     {
-        return _context->_data[_idx];
+        unsigned char tmp = (unsigned char)_context->_data[_idx];
+        return tmp;
     }
     return 0;
 }
@@ -994,7 +1233,7 @@ void JsonNode::addNode(const char* key, JsonNode* node)
 	addNode(node);
 }
 
-void JsonNode::addStringNode(const char* key, const char* val)
+void JsonNode::addString(const char* key, const char* val)
 {
     JsonNode* valNode = newStringNode();
     valNode->setString(val);
@@ -1014,7 +1253,7 @@ void JsonNode::addStringNode(const char* key, const char* val)
     }
 }
 
-void JsonNode::addNumberNode(const char* key, double val)
+void JsonNode::addNumber(const char* key, double val)
 {
     JsonNode* valNode = newNumberNode();
     valNode->setNumber(val);
@@ -1034,7 +1273,7 @@ void JsonNode::addNumberNode(const char* key, double val)
     }
 }
 
-void JsonNode::addBoolNode(const char* key, bool val)
+void JsonNode::addBool(const char* key, bool val)
 {
     JsonNode* valNode = newNumberNode();
     valNode->setBool(val);
@@ -1054,7 +1293,7 @@ void JsonNode::addBoolNode(const char* key, bool val)
     }
 }
 
-void JsonNode::addIntegerNode(const char* key, int val)
+void JsonNode::addInteger(const char* key, int val)
 {
     JsonNode* valNode = newNumberNode();
     valNode->setInteger(val);
@@ -1074,7 +1313,7 @@ void JsonNode::addIntegerNode(const char* key, int val)
     }
 }
 
-void JsonNode::addLongNode(const char* key, long val)
+void JsonNode::addLong(const char* key, long val)
 {
     JsonNode* valNode = newNumberNode();
     valNode->setLong(val);
@@ -1094,7 +1333,7 @@ void JsonNode::addLongNode(const char* key, long val)
     }
 }
 
-void JsonNode::addDoubleNode(const char* key, double val)
+void JsonNode::addDouble(const char* key, double val)
 {
     JsonNode* valNode = newNumberNode();
     valNode->setDouble(val);
@@ -1324,10 +1563,12 @@ void JsonNumber::__write(JsonContext* context)
 		switch (_segment->_type)
 		{
 			case JsonSegment::SEGMENTBOOL:
-				ToString(_segment->_value._bool, buff, 256);
+                int2str(_segment->_value._bool?1:0, buff);
+//				ToString(_segment->_value._bool, buff, 256);
 				break;
 			case JsonSegment::SEGMENTINT:
-				ToString(_segment->_value._int, buff, 256);
+                int2str(_segment->_value._int, buff);
+//				ToString(_segment->_value._int, buff, 256);
 				break;
 			case JsonSegment::SEGMENTLONG:
 				ToString(_segment->_value._long, buff, 256);
